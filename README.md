@@ -50,6 +50,3 @@ LinkedIn proje formlarını GitHub repolarınızdan otomatik olarak dolduran bir
 
 Bu proje açık kaynak kodludur. Dilediğiniz gibi kullanabilirsiniz.
 
-## Destek
-
-Sorularınız için GitHub Issues kullanabilirsiniz.
