@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>LinkedIn Project Filler</title>
+  <script src="popup.js" defer></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      width: 420px;
+      min-height: 500px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
+    }
+    
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      text-align: center;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .header {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    
+    .options-btn {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+    
+    .options-btn:hover {
+      background: rgba(255,255,255,0.2);
+      transform: rotate(90deg);
+    }
+    
+    .api-status {
+      text-align: center;
+      font-size: 12px;
+      margin-bottom: 15px;
+      padding: 8px;
+      border-radius: 6px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .api-status.connected {
+      background: rgba(76, 175, 80, 0.2);
+      color: #4CAF50;
+    }
+    
+    .api-status.disconnected {
+      background: rgba(244, 67, 54, 0.2);
+      color: #f44336;
+    }
+    
+    .api-status.loading {
+      background: rgba(255, 193, 7, 0.2);
+      color: #FFC107;
+    }
+    
+    .input-group {
+      margin-bottom: 15px;
+    }
+    
+    input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      font-size: 14px;
+      backdrop-filter: blur(10px);
+    }
+    
+    input::placeholder {
+      color: rgba(255,255,255,0.7);
+    }
+    
+    input:focus {
+      outline: none;
+      background: rgba(255,255,255,0.2);
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.3);
+    }
+    
+    .button-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    button {
+      flex: 1;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: none;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    #fetchBtn {
+      background: linear-gradient(45deg, #4CAF50, #45a049);
+      color: white;
+    }
+    
+    #fetchBtn:hover:not(:disabled) {
+      background: linear-gradient(45deg, #45a049, #4CAF50);
+      transform: translateY(-2px);
+    }
+    
+    #genDescBtn {
+      background: linear-gradient(45deg, #2196F3, #1976D2);
+      color: white;
+    }
+    
+    #genDescBtn:hover:not(:disabled) {
+      background: linear-gradient(45deg, #1976D2, #2196F3);
+      transform: translateY(-2px);
+    }
+    
+    #fillBtn {
+      background: linear-gradient(45deg, #9C27B0, #7B1FA2);
+      color: white;
+      width: 100%;
+      margin-top: 15px;
+    }
+    
+    #fillBtn:hover:not(:disabled) {
+      background: linear-gradient(45deg, #7B1FA2, #9C27B0);
+      transform: translateY(-2px);
+    }
+    
+    .repo-card {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 20px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .repo-card h2 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #FFD700;
+    }
+    
+    .repo-card p {
+      font-size: 13px;
+      line-height: 1.4;
+      margin-bottom: 8px;
+      opacity: 0.9;
+    }
+    
+    .repo-stats {
+      display: flex;
+      gap: 15px;
+      margin: 10px 0;
+      font-size: 12px;
+    }
+    
+    .repo-stats span {
+      background: rgba(255,255,255,0.1);
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    
+    .repo-readme {
+      margin: 15px 0;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    
+    .repo-readme pre {
+      background: #2d3748;
+      color: #e2e8f0;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      line-height: 1.4;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      border: 1px solid #4a5568;
+    }
+    
+    .repo-readme summary {
+      cursor: pointer;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #FFD700;
+    }
+    
+    .project-preview {
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+      border-left: 4px solid #4CAF50;
+    }
+    
+    .project-preview h4 {
+      color: #4CAF50;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    
+    .project-preview p {
+      font-size: 12px;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+    
+    .project-preview strong {
+      color: #FFD700;
+    }
+    
+    .project-preview a {
+      color: #64B5F6;
+      text-decoration: none;
+      word-break: break-all;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .status-message {
+      text-align: center;
+      font-size: 12px;
+      margin-top: 10px;
+      padding: 8px;
+      border-radius: 6px;
+    }
+    
+    .status-success {
+      background: rgba(76, 175, 80, 0.2);
+      color: #4CAF50;
+    }
+    
+    .status-error {
+      background: rgba(244, 67, 54, 0.2);
+      color: #f44336;
+    }
+    
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.3);
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🚀 LinkedIn Project Filler</h1>
+    <button id="optionsBtn" class="options-btn" title="Ayarlar">⚙️</button>
+  </div>
+  
+  <div id="apiStatus" class="api-status loading">
+    <span id="apiStatusText">🔄 API durumu kontrol ediliyor...</span>
+  </div>
+  
+  <div class="input-group">
+    <input id="repoUrl" type="text" placeholder="GitHub repository URL'ini girin" 
+           autocomplete="off" spellcheck="false">
+  </div>
+  
+  <div class="button-row">
+    <button id="fetchBtn">📥 Repo Getir</button>
+    <button id="genDescBtn" disabled>✨ AI Oluştur</button>
+  </div>
+  
+  <div id="repoCard" class="repo-card hidden">
+    <h2 id="repoName"></h2>
+    <p id="repoDesc"></p>
+    
+    <div class="repo-stats">
+      <span id="repoLang"></span>
+      <span id="repoStars"></span>
+    </div>
+    
+    <div id="repoReadme" class="repo-readme hidden"></div>
+    
+    <div id="genResult" class="hidden"></div>
+    
+    <button id="fillBtn" disabled>LinkedIn'e Doldur</button>
+  </div>
+  
+  <div id="statusMessage" class="status-message hidden"></div>
+</body>
+</html>
